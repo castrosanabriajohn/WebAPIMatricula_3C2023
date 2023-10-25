@@ -13,11 +13,12 @@ using WebAPIMatricula_3C2023.Services;
 
 namespace WebAPIMatricula_3C2023.Controllers;
 
-[ApiController, Route("[controller]")]
+[ApiController]
+[Route("[controller]")]
 public class UsersController : ControllerBase
 {
-    private IUserService _userService;
-    private IMapper _mapper;
+    private readonly IUserService _userService;
+    private readonly IMapper _mapper;
     private readonly AppSettings _appSettings;
 
     public UsersController(
@@ -32,48 +33,33 @@ public class UsersController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("authenticate")]
-    public IActionResult Authenticate([FromBody] AuthenticateModel model)
+    public async Task<IActionResult> Authenticate([FromBody] AuthenticateModel model)
     {
-        var user = _userService.Authenticate(model.Username, model.Password);
+        var user = await _userService.Authenticate(model.Username, model.Password);
 
         if (user == null)
-            return Unauthorized(new { message = "Credenciales incorrectas" });
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-        int minutosExpiracionToken = Convert.ToInt32(_appSettings.MinutosExpiracionToken);
-        var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new Claim[]
-            {
-                 new Claim(ClaimTypes.Name, user.Codigo.ToString())
-            }),
-            NotBefore = DateTime.UtcNow,
-            Expires = DateTime.UtcNow.AddMinutes(minutosExpiracionToken),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
+            return Unauthorized(new { message = "Credenciales incorrectas" });
+        }
+
+        var token = GenerateJwtToken(user);
 
         // return basic user info and authentication token
-
         return Ok(new
         {
-            Codigo = user.Codigo,
-            Identificacion = user.Identificacion,
-            NombreCompleto = user.NombreCompleto,
-            CorreoElectronico = user.CorreoElectronico,
-            Username = user.Username,
-            Token = tokenString,
-            Estado = user.Estado
+            user.Codigo,
+            user.Identificacion,
+            user.NombreCompleto,
+            user.CorreoElectronico,
+            user.Username,
+            Token = token,
+            user.Estado
         });
     }
 
-
-
     [AllowAnonymous]
     [HttpPost("register")]
-    public IActionResult Register([FromBody] RegisterModel model)
+    public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
         // map model to entity
         var user = _mapper.Map<Usuario>(model);
@@ -81,7 +67,7 @@ public class UsersController : ControllerBase
         try
         {
             // create user
-            _userService.Create(user, model.Password);
+            await _userService.Create(user, model.Password);
             return Ok();
         }
         catch (AppException ex)
@@ -92,23 +78,27 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        var users = _userService.GetAll();
+        var users = await _userService.GetAll();
         var model = _mapper.Map<IList<UserModel>>(users);
         return Ok(model);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var user = _userService.GetById(id);
+        var user = await _userService.GetById(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
         var model = _mapper.Map<UserModel>(user);
         return Ok(model);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(int id, [FromBody] UpdateModel model)
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateModel model)
     {
         // map model to entity and set id
         var user = _mapper.Map<Usuario>(model);
@@ -117,7 +107,7 @@ public class UsersController : ControllerBase
         try
         {
             // update user 
-            _userService.Update(user, model.Password);
+            await _userService.Update(user, model.Password);
             return Ok(user);
         }
         catch (AppException ex)
@@ -128,9 +118,27 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _userService.Delete(id);
-        return Ok();
+        await _userService.Delete(id);
+        return NoContent();
+    }
+
+    private string GenerateJwtToken(Usuario user)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, user.Codigo.ToString())
+            }),
+            NotBefore = DateTime.UtcNow,
+            Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(_appSettings.MinutosExpiracionToken)),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512)
+        };
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 }

@@ -1,217 +1,178 @@
-﻿using WebAPIMatricula_3C2023.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using WebAPIMatricula_3C2023.Entities;
 using WebAPIMatricula_3C2023.Helpers;
 
 namespace WebAPIMatricula_3C2023.Services;
 
 public interface IUserService
 {
-    Usuario Authenticate(string username, string password);
-    IEnumerable<Usuario> GetAll();
-    Usuario GetById(int id);
-    Usuario Create(Usuario user, string password);
-    void Update(Usuario user, string password = null);
-    void Delete(int id);
+    Task<Usuario> Authenticate(string username, string password);
+    Task<IEnumerable<Usuario>> GetAll();
+    Task<Usuario> GetById(int id);
+    Task Create(Usuario user, string password);
+    Task Update(Usuario user, string password = null);
+    Task Delete(int id);
 }
-
-
 
 public class UserService : IUserService
 {
-    private DataContext _context;
-
-
+    private readonly DataContext _context;
 
     public UserService(DataContext context)
     {
-        _context = context;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
-    public Usuario Authenticate(string username, string password)
+
+    public async Task<Usuario> Authenticate(string username, string password)
     {
+        // Check username and password are valid
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+        {
             return null;
+        }
 
+        // Check if username exists
+        var user = await _context.Usuario.SingleOrDefaultAsync(x => x.Username == username);
 
-
-        var user = _context.Usuario.SingleOrDefault(x => x.Username == username);
-
-
-
-        // check if username exists
-        if (user == null)
+        // If user exists check if password is correct
+        if (user == null || !VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+        {
             return null;
+        }
 
-
-
-        // check if password is correct
-        if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-            return null;
-
-
-
-        // authentication successful
+        // Authentication successful
         return user;
     }
 
-
-
-    public Usuario Create(Usuario user, string password)
+    public async Task Create(Usuario user, string password)
     {
-        // validation
+        // Password validation
         if (string.IsNullOrWhiteSpace(password))
-            throw new AppException("Password requerido");
-
-
-
+        {
+            throw new AppException("La contraseña es requerida.");
+        }
+        // Username validation
         if (_context.Usuario.Any(x => x.Username == user.Username))
-            throw new AppException("Nombre de usuario \"" + user.Username + "\" ya existe");
-
-
-
-        byte[] passwordHash, passwordSalt;
-        CreatePasswordHash(password, out passwordHash, out passwordSalt);
-
-
-
+        {
+            throw new AppException($"Nombre de usuario '{user.Username}' ya existe.");
+        }
+        // Create password hash with inline variables
+        CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+        // Add hash and salt to return object
         user.PasswordHash = passwordHash;
         user.PasswordSalt = passwordSalt;
-
-
-
-        _context.Usuario.Add(user);
-        _context.SaveChanges();
-
-
-
-        return user;
+        // Perform and save changes
+        await _context.Usuario.AddAsync(user);
+        await _context.SaveChangesAsync();
     }
 
-
-
-    public void Delete(int id)
+    public async Task Delete(int id)
     {
-        var user = _context.Usuario.Find(id);
+        var user = await _context.Set<Usuario>().SingleOrDefaultAsync(e => e.Codigo == id);
         if (user != null)
         {
-            _context.Usuario.Remove(user);
-            _context.SaveChanges();
+            _context.Entry(user).State = EntityState.Deleted;
+            await _context.SaveChangesAsync();
         }
     }
 
+    public async Task<IEnumerable<Usuario>> GetAll() => await _context.Set<Usuario>().ToListAsync();
 
-
-    public IEnumerable<Usuario> GetAll()
+    public async Task<Usuario> GetById(int id)
     {
-        return _context.Usuario;
+        var user = await _context.Set<Usuario>().SingleOrDefaultAsync(e => e.Codigo == id);
+        return user;
     }
 
-
-
-    public Usuario GetById(int id)
+    public async Task Update(Usuario userParam, string password = null)
     {
-        return _context.Usuario.Find(id);
-    }
-
-
-
-    public void Update(Usuario userParam, string password = null)
-    {
-        var user = _context.Usuario.Find(userParam.Codigo);
-
-
+        var user = await _context.Usuario.SingleOrDefaultAsync(e => e.Codigo == userParam.Codigo);
 
         if (user == null)
+        {
             throw new AppException("Usuario no encontrado");
+        }
 
-
-
-        // update username if it has changed
+        // Update username if changed
         if (!string.IsNullOrWhiteSpace(userParam.Username) && userParam.Username != user.Username)
         {
-            // throw error if the new username is already taken
-            if (_context.Usuario.Any(x => x.Username == userParam.Username))
-                throw new AppException("Nombre de usuario " + userParam.Username + " ya existe");
-
-
-
+            // Throw an error if the new username is already taken
+            if (await _context.Usuario.AnyAsync(x => x.Username == userParam.Username))
+            {
+                throw new AppException($"Nombre de usuario {userParam.Username} ya existe");
+            }
             user.Username = userParam.Username;
         }
 
-
-
-        // update user properties if provided
-        //NOMBRE E IDENTIFICACION NO ACTUALIZABLES
-        //if (!string.IsNullOrWhiteSpace(userParam.Identificacion))
-        //    user.Identificacion = userParam.Identificacion;
-
-
-
-        //if (!string.IsNullOrWhiteSpace(userParam.NombreCompleto))
-        //    user.NombreCompleto = userParam.NombreCompleto;
-
-
-
-
-
         if (!string.IsNullOrWhiteSpace(userParam.CorreoElectronico))
+        {
             user.CorreoElectronico = userParam.CorreoElectronico;
+        }
 
-
-
-        // update password if provided
+        // Update password if provided
         if (!string.IsNullOrWhiteSpace(password))
         {
-            byte[] passwordHash, passwordSalt;
-            CreatePasswordHash(password, out passwordHash, out passwordSalt);
-
-
-
+            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
         }
 
-
-
         _context.Usuario.Update(user);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
-
-
 
     private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
-        if (password == null) throw new ArgumentNullException("password");
-        if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("El password no puede ser una cadena vacía o espacios en blanco.", "password");
+        if (password == null)
+        {
+            throw new ArgumentNullException(nameof(password));
+        }
 
-
-
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            throw new ArgumentException("El password no puede ser una cadena vacía o espacios en blanco.", nameof(password));
+        }
+        // use hmacsha512 to generate secure hash and salt
         using (var hmac = new System.Security.Cryptography.HMACSHA512())
         {
-            passwordSalt = hmac.Key;
-            passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            passwordSalt = hmac.Key; //  returns a randomly generated cryptographic key
+            passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); // converts password string to byte array
         }
     }
 
-
-
     private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
     {
-        if (password == null) throw new ArgumentNullException("password");
-        if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("El password no puede ser una cadena vacía o espacios en blanco.", "password");
-        if (storedHash.Length != 64) throw new ArgumentException("Longitud invalida del password hash (64 bytes esperados).", "passwordHash");
-        if (storedSalt.Length != 128) throw new ArgumentException("Longitud invalida del password salt (128 bytes esperados).", "passwordSalt");
+        if (password == null)
+        {
+            throw new ArgumentNullException(nameof(password));
+        }
 
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            throw new ArgumentException("El password no puede ser una cadena vacía o espacios en blanco.", nameof(password));
+        }
 
+        if (storedHash.Length != 64)
+        {
+            throw new ArgumentException("Longitud invalida del password hash (64 bytes esperados).", nameof(storedHash));
+        }
 
+        if (storedSalt.Length != 128)
+        {
+            throw new ArgumentException("Longitud invalida del password salt (128 bytes esperados).", nameof(storedSalt));
+        }
+
+        // Create hmac instance for stored salt
         using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
         {
+            // computes the hash of input password using the original stored salt  
             var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             for (int i = 0; i < computedHash.Length; i++)
             {
+                // ensure computed hash will match the orignal
                 if (computedHash[i] != storedHash[i]) return false;
             }
         }
-
-
 
         return true;
     }
