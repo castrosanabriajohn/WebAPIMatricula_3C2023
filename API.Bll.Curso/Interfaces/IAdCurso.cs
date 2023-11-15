@@ -1,15 +1,26 @@
-﻿namespace API.Bll.Curso.Interfaces;
+﻿// Input alias
+using AgregarEntrada = API.Dto.Curso.Entrada.AgregarCurso;
+using EditarEntrada = API.Dto.Curso.Entrada.EditarCurso;
+using EliminarEntrada = API.Dto.Curso.Entrada.EliminarCurso;
+using VerDetalleEntrada = API.Dto.Curso.Entrada.VerDetalleCurso;
+// Output alias
+using AgregarSalida = API.Dto.Curso.Salida.AgregarCurso;
+using EditarSalida = API.Dto.Curso.Salida.EditarCurso;
+using EliminarSalida = API.Dto.Curso.Salida.EliminarCurso;
+using VerDetalleSalida = API.Dto.Curso.Salida.VerDetalleCurso;
+using VerTodosSalida = API.Dto.Curso.Salida.VerTodosCursos;
+
+namespace API.Bll.Curso.Interfaces;
 
 public interface IAdCurso
-
 {
-    API.Dto.Curso.Salida.AgregarCurso AgregarCurso(API.Dto.Curso.Entrada.AgregarCurso pInformacion);
+    AgregarSalida AgregarCurso(AgregarEntrada pInformacion);
 
-    API.Dto.Curso.Salida.EditarCurso EditarCurso(API.Dto.Curso.Entrada.EditarCurso pInformacion);
+    EditarSalida EditarCurso(EditarEntrada pInformacion);
 
-    API.Dto.Curso.Salida.EliminarCurso EliminarCurso(API.Dto.Curso.Entrada.EliminarCurso pInformacion);
+    EliminarSalida EliminarCurso(EliminarEntrada pInformacion);
 
-    API.Dto.Curso.Salida.VerTodosCursos VerTodosCursos();
+    VerTodosSalida VerTodosCursos();
 
-    API.Dto.Curso.Salida.VerDetalleCurso VerDetalleCurso(API.Dto.Curso.Entrada.VerDetalleCurso pInformacion);
+    VerDetalleSalida VerDetalleCurso(VerDetalleEntrada pInformacion);
 }

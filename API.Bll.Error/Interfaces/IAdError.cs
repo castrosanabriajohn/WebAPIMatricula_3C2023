@@ -1,7 +1,13 @@
-﻿namespace API.Bll.Error.Interfaces;
+﻿// Input alias
+using AgregarEntrada = API.Dto.Error.Entrada.AgregarError;
+// Output alias
+using AgregarSalida = API.Dto.Error.Salida.AgregarError;
+using VerTodosSalida = API.Dto.Error.Salida.VerTodosErrores;
+
+namespace API.Bll.Error.Interfaces;
 
 public interface IAdError
 {
-    API.Dto.Error.Salida.VerTodosErrores VerTodosErrores();
-    API.Dto.Error.Salida.AgregarError AgregarError(API.Dto.Error.Entrada.AgregarError pInformacion);
+    AgregarSalida AgregarError(AgregarEntrada pInformacion);
+    VerTodosSalida VerTodosErrores();
 }

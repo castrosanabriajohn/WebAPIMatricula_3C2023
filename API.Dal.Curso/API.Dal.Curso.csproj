@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\API.Bll.Curso\API.Bll.Curso.csproj" />
+    <ProjectReference Include="..\API.Dal.General\API.Dal.General.csproj" />
+    <ProjectReference Include="..\API.Dto.Curso\API.Dto.Curso.csproj" />
+    <ProjectReference Include="..\Api.Dto.General\Api.Dto.General.csproj" />
+  </ItemGroup>
+
+</Project>

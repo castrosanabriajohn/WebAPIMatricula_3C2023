@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\API.BLL.Beca\API.Bll.Beca.csproj" />
+    <ProjectReference Include="..\API.Dal.General\API.Dal.General.csproj" />
+    <ProjectReference Include="..\Api.Dto.Beca\Api.Dto.Beca.csproj" />
+    <ProjectReference Include="..\Api.Dto.General\Api.Dto.General.csproj" />
+  </ItemGroup>
+
+</Project>

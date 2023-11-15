@@ -1,97 +1,115 @@
-﻿using API.Bll.Estudiante.Interfaces;
+﻿// Input alias directives
+using EditarEstudianteEntrada = API.Dto.Estudiante.Entrada.EditarEstudiante;
+using EliminarEstudianteEntrada = API.Dto.Estudiante.Entrada.EliminarEstudiante;
+using VerDetalleEstudianteEntrada = API.Dto.Estudiante.Entrada.VerDetalleEstudiante;
+using VerTodosEstudiantesEntrada = API.Dto.Estudiante.Entrada.VerTodosEstudiantes;
+using AgregarEstudianteEntrada = API.Dto.Estudiante.Entrada.AgregarEstudiante;
 
-namespace API.Bll.Estudiante;
-public class LnEstudiante
+// Output alias directives
+using AgregarEstudianteSalida = API.Dto.Estudiante.Salida.AgregarEstudiante;
+using EditarEstudianteSalida = API.Dto.Estudiante.Salida.EditarEstudiante;
+using EliminarEstudianteSalida = API.Dto.Estudiante.Salida.EliminarEstudiante;
+using VerDetalleEstudianteSalida = API.Dto.Estudiante.Salida.VerDetalleEstudiante;
+using VerTodosEstudiantesSalida = API.Dto.Estudiante.Salida.VerTodosEstudiantes;
+
+using API.Bll.Estudiante.Interfaces;
+
+namespace API.Bll.Estudiante
 {
-    private IAdEstudiante adEstudiante;
-
-    public LnEstudiante(IAdEstudiante accesoDatosEstudiante)
+    public class LnEstudiante
     {
-        this.adEstudiante = accesoDatosEstudiante;
-    }
+        private IAdEstudiante _adEstudiante;
 
-    public API.Dto.Estudiante.Salida.VerTodosEstudiantes VerTodosEstudiantes(Dto.Estudiante.Entrada.VerTodosEstudiantes pInformacion)
-    {
-        API.Dto.Estudiante.Salida.VerTodosEstudiantes respuesta = new API.Dto.Estudiante.Salida.VerTodosEstudiantes();
-
-        try
+        public LnEstudiante(IAdEstudiante adEstudiante)
         {
-            respuesta = adEstudiante.VerTodosEstudiantes();
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            _adEstudiante = adEstudiante;
         }
 
-        return respuesta;
-    }
-
-    public Dto.Estudiante.Salida.VerDetalleEstudiante VerDetalleEstudiante(Dto.Estudiante.Entrada.VerDetalleEstudiante pInformacion)
-    {
-        API.Dto.Estudiante.Salida.VerDetalleEstudiante respuesta = new Dto.Estudiante.Salida.VerDetalleEstudiante();
-
-        try
+        public VerTodosEstudiantesSalida VerTodosEstudiantes(VerTodosEstudiantesEntrada pInformacion)
         {
-            respuesta = adEstudiante.VerDetalleEstudiante(pInformacion);
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
-        }
+            var respuesta = new VerTodosEstudiantesSalida();
 
-        return respuesta;
-    }
+            try
+            {
+                respuesta = _adEstudiante.VerTodosEstudiantes();
+            }
+            catch (Exception ex)
+            {
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+            }
 
-    public API.Dto.Estudiante.Salida.AgregarEstudiante AgregarEstudiante(Dto.Estudiante.Entrada.AgregarEstudiante pInformacion)
-    {
-        API.Dto.Estudiante.Salida.AgregarEstudiante respuesta = new API.Dto.Estudiante.Salida.AgregarEstudiante();
-
-        try
-        {
-            respuesta = adEstudiante.AgregarEstudiante(pInformacion);
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            return respuesta;
         }
 
-        return respuesta;
-    }
-
-    public Dto.Estudiante.Salida.EditarEstudiante EditarEstudiante(Dto.Estudiante.Entrada.EditarEstudiante pInformacion)
-    {
-        API.Dto.Estudiante.Salida.EditarEstudiante respuesta = new API.Dto.Estudiante.Salida.EditarEstudiante();
-
-        try
+        public VerDetalleEstudianteSalida VerDetalleEstudiante(VerDetalleEstudianteEntrada pInformacion)
         {
-            API.Dto.Estudiante.Entrada.VerDetalleEstudiante entradaVerDetalleEstudiante = new API.Dto.Estudiante.Entrada.VerDetalleEstudiante();
-            entradaVerDetalleEstudiante.Codigo = pInformacion.Codigo;
-            API.Dto.Estudiante.Salida.VerDetalleEstudiante detalleTrader = adEstudiante.VerDetalleEstudiante(entradaVerDetalleEstudiante);
+            var respuesta = new VerDetalleEstudianteSalida();
 
-            respuesta = adEstudiante.EditarEstudiante(pInformacion);
+            try
+            {
+                respuesta = _adEstudiante.VerDetalleEstudiante(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+            }
 
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            return respuesta;
         }
 
-        return respuesta;
-    }
-    public Dto.Estudiante.Salida.EliminarEstudiante EliminarEstudiante(Dto.Estudiante.Entrada.EliminarEstudiante pInformacion)
-    {
-        API.Dto.Estudiante.Salida.EliminarEstudiante respuesta = new Dto.Estudiante.Salida.EliminarEstudiante();
-
-        try
+        public AgregarEstudianteSalida AgregarEstudiante(AgregarEstudianteEntrada pInformacion)
         {
-            respuesta = adEstudiante.EliminarEstudiante(pInformacion);
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            var respuesta = new AgregarEstudianteSalida();
+
+            try
+            {
+                respuesta = _adEstudiante.AgregarEstudiante(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+            }
+
+            return respuesta;
         }
 
-        return respuesta;
+        public EditarEstudianteSalida EditarEstudiante(EditarEstudianteEntrada pInformacion)
+        {
+            var respuesta = new EditarEstudianteSalida();
+
+            try
+            {
+                VerDetalleEstudianteEntrada verDetalleEntrada = new()
+                {
+                    Codigo = pInformacion.Codigo
+                };
+
+                VerDetalleEstudianteSalida verDetalleSalida = _adEstudiante.VerDetalleEstudiante(verDetalleEntrada);
+
+                respuesta = _adEstudiante.EditarEstudiante(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+            }
+
+            return respuesta;
+        }
+
+        public EliminarEstudianteSalida EliminarEstudiante(EliminarEstudianteEntrada pInformacion)
+        {
+            var respuesta = new EliminarEstudianteSalida();
+
+            try
+            {
+                respuesta = _adEstudiante.EliminarEstudiante(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+            }
+
+            return respuesta;
+        }
     }
 }
-

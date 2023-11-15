@@ -1,45 +1,51 @@
-﻿using API.Bll.Error.Interfaces;
+﻿// Input alias directives
+using AgregarErrorEntrada = API.Dto.Error.Entrada.AgregarError;
+// Output alias directives
+using AgregarErrorSalida = API.Dto.Error.Salida.AgregarError;
+using VerTodosErroresSalida = API.Dto.Error.Salida.VerTodosErrores;
+using API.Bll.Error.Interfaces;
 
-namespace API.Bll.Error;
-
-public class LnError
+namespace API.Bll.Error
 {
-    private IAdError adError;
-
-    public LnError(IAdError accesoDatosError)
+    public class LnError
     {
-        this.adError = accesoDatosError;
-    }
+        private readonly IAdError _adError;
 
-    public API.Dto.Error.Salida.AgregarError AgregarError(Dto.Error.Entrada.AgregarError pInformacion)
-    {
-        API.Dto.Error.Salida.AgregarError respuesta = new API.Dto.Error.Salida.AgregarError();
-
-        try
+        public LnError(IAdError adError)
         {
-            respuesta = adError.AgregarError(pInformacion);
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            _adError = adError;
         }
 
-        return respuesta;
-    }
-
-    public API.Dto.Error.Salida.VerTodosErrores VerTodosErrores(Dto.Error.Entrada.VerTodosErrores pInformacion)
-    {
-        API.Dto.Error.Salida.VerTodosErrores respuesta = new API.Dto.Error.Salida.VerTodosErrores();
-
-        try
+        public AgregarErrorSalida AgregarError(AgregarErrorEntrada pInformacion)
         {
-            respuesta = adError.VerTodosErrores();
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            var respuesta = new AgregarErrorSalida();
+
+            try
+            {
+                respuesta = _adError.AgregarError(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+            }
+
+            return respuesta;
         }
 
-        return respuesta;
+        public VerTodosErroresSalida VerTodosErrores()
+        {
+            var respuesta = new VerTodosErroresSalida();
+
+            try
+            {
+                respuesta = _adError.VerTodosErrores();
+            }
+            catch (Exception ex)
+            {
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+            }
+
+            return respuesta;
+        }
     }
 }

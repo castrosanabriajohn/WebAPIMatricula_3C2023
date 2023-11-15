@@ -1,92 +1,95 @@
-﻿using API.Bll.Curso.Interfaces;
+﻿// Input alias directives
+using AgregarCursoEntrada = API.Dto.Curso.Entrada.AgregarCurso;
+using EditarCursoEntrada = API.Dto.Curso.Entrada.EditarCurso;
+using VerDetalleCursoEntrada = API.Dto.Curso.Entrada.VerDetalleCurso;
+using EliminarCursoEntrada = API.Dto.Curso.Entrada.EliminarCurso;
+// Output alias directives
+using AgregarCursoSalida = API.Dto.Curso.Salida.AgregarCurso;
+using EditarCursoSalida = API.Dto.Curso.Salida.EditarCurso;
+using VerTodosCursosSalida = API.Dto.Curso.Salida.VerTodosCursos;
+using VerDetalleCursoSalida = API.Dto.Curso.Salida.VerDetalleCurso;
+using EliminarCursoSalida = API.Dto.Curso.Salida.EliminarCurso;
+using API.Bll.Curso.Interfaces;
 
-namespace API.Bll.Curso;
-
-public class LnCurso
+namespace API.Bll.Curso
 {
-    private readonly IAdCurso adCurso;
-
-    public LnCurso(IAdCurso accesoDatosCurso)
+    public class LnCurso
     {
-        adCurso = accesoDatosCurso;
-    }
+        private readonly IAdCurso _adCurso;
 
-    public API.Dto.Curso.Salida.AgregarCurso AgregarCurso(Dto.Curso.Entrada.AgregarCurso pInformacion)
-    {
-        API.Dto.Curso.Salida.AgregarCurso respuesta = new API.Dto.Curso.Salida.AgregarCurso();
-
-        try
+        public LnCurso(IAdCurso accesoDatosCurso)
         {
-            respuesta = adCurso.AgregarCurso(pInformacion);
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            _adCurso = accesoDatosCurso;
         }
 
-        return respuesta;
-    }
-
-    public API.Dto.Curso.Salida.EditarCurso EditarCurso(Dto.Curso.Entrada.EditarCurso pInformacion)
-    {
-        API.Dto.Curso.Salida.EditarCurso respuesta = new API.Dto.Curso.Salida.EditarCurso();
-
-        try
+        public AgregarCursoSalida AgregarCurso(AgregarCursoEntrada pInformacion)
         {
-            respuesta = adCurso.EditarCurso(pInformacion);
-        }
-        catch(Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            try
+            {
+                return _adCurso.AgregarCurso(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                var respuesta = new AgregarCursoSalida();
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+                return respuesta;
+            }
         }
 
-        return respuesta;
-    }
-
-    public API.Dto.Curso.Salida.VerTodosCursos VerTodosCursos(Dto.Curso.Entrada.VerTodosCursos pInformacion)
-    {
-        API.Dto.Curso.Salida.VerTodosCursos respuesta = new API.Dto.Curso.Salida.VerTodosCursos();
-
-        try
+        public EditarCursoSalida EditarCurso(EditarCursoEntrada pInformacion)
         {
-            respuesta = adCurso.VerTodosCursos();
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            try
+            {
+                return _adCurso.EditarCurso(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                var respuesta = new EditarCursoSalida();
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+                return respuesta;
+            }
         }
 
-        return respuesta;
-    }
-
-    public Dto.Curso.Salida.VerDetalleCurso VerDetalleCurso(Dto.Curso.Entrada.VerDetalleCurso pInformacion)
-    {
-        API.Dto.Curso.Salida.VerDetalleCurso respuesta = new Dto.Curso.Salida.VerDetalleCurso();
-        try
+        public VerTodosCursosSalida VerTodosCursos()
         {
-            respuesta = adCurso.VerDetalleCurso(pInformacion);
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
-        }
-
-        return respuesta;
-    }
-
-    public Dto.Curso.Salida.EliminarCurso EliminarCurso(Dto.Curso.Entrada.EliminarCurso pInformacion)
-    {
-        API.Dto.Curso.Salida.EliminarCurso respuesta = new Dto.Curso.Salida.EliminarCurso();
-
-        try
-        {
-            respuesta = adCurso.EliminarCurso(pInformacion);
-        }
-        catch (Exception ex)
-        {
-            respuesta.setErrorComunicacion(ex.Message.ToString());
+            try
+            {
+                return _adCurso.VerTodosCursos();
+            }
+            catch (Exception ex)
+            {
+                var respuesta = new VerTodosCursosSalida();
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+                return respuesta;
+            }
         }
 
-        return respuesta;
+        public VerDetalleCursoSalida VerDetalleCurso(VerDetalleCursoEntrada pInformacion)
+        {
+            try
+            {
+                return _adCurso.VerDetalleCurso(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                var respuesta = new VerDetalleCursoSalida();
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+                return respuesta;
+            }
+        }
+
+        public EliminarCursoSalida EliminarCurso(EliminarCursoEntrada pInformacion)
+        {
+            try
+            {
+                return _adCurso.EliminarCurso(pInformacion);
+            }
+            catch (Exception ex)
+            {
+                var respuesta = new EliminarCursoSalida();
+                respuesta.setErrorComunicacion(ex.Message.ToString());
+                return respuesta;
+            }
+        }
     }
 }

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "API.Dto.Curso": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:65080;http://localhost:65081"
+    }
+  }
+}
