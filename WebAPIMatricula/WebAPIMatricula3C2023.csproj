@@ -28,7 +28,7 @@
     <ProjectReference Include="..\Api.Dto.Estudiante\Api.Dto.Estudiante.csproj" />
     <ProjectReference Include="..\Api.Dto.Factura\Api.Dto.Factura.csproj" />
     <ProjectReference Include="..\Api.Dto.General\Api.Dto.General.csproj" />
-    <ProjectReference Include="..\WebAPIMatricula_3C2023\WebAPIMatricula_3C2023.csproj" />
+    <ProjectReference Include="..\WebAPIMatricula_3C2023\WebAPI.csproj" />
   </ItemGroup>
 
 </Project>
